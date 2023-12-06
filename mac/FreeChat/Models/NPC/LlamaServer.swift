@@ -96,14 +96,27 @@ actor LlamaServer {
 
     process.executableURL = Bundle.main.url(forAuxiliaryExecutable: "freechat-server")
     let processes = ProcessInfo.processInfo.activeProcessorCount
-    process.arguments = [
-      "--model", modelPath,
-      "--threads", "\(max(1, ceil(Double(processes) / 3.0 * 2.0)))",
-      "--ctx-size", "4096",
-      "--port", port,
-      // llama crashes on intel macs when gpu-layers != 0, not sure why
-      "--n-gpu-layers", getMachineHardwareName() == "arm64" ? "4" : "0"
-    ]
+
+      if modelPath.contains("xgen") || modelPath.contains("codegen") {
+          process.arguments = [
+            "--model", modelPath,
+            "--threads", "\(max(1, ceil(Double(processes) / 3.0 * 2.0)))",
+            "--ctx-size", "4096",
+            "--port", port,
+            "-X",
+            // llama crashes on intel macs when gpu-layers != 0, not sure why
+            "--n-gpu-layers", getMachineHardwareName() == "arm64" ? "4" : "0"
+          ]
+      } else {
+          process.arguments = [
+            "--model", modelPath,
+            "--threads", "\(max(1, ceil(Double(processes) / 3.0 * 2.0)))",
+            "--ctx-size", "4096",
+            "--port", port,
+            // llama crashes on intel macs when gpu-layers != 0, not sure why
+            "--n-gpu-layers", getMachineHardwareName() == "arm64" ? "4" : "0"
+          ]
+      }
 
     print("starting llama.cpp server \(process.arguments!.joined(separator: " "))")
 
@@ -155,6 +168,11 @@ actor LlamaServer {
     let start = CFAbsoluteTimeGetCurrent()
     try await startServer()
 
+    var is_xgen = false
+    if self.modelPath.contains("xgen") || self.modelPath.contains("codegen") {
+        is_xgen = true
+    }
+
     // hit localhost for completion
     let params = CompleteParams(
       prompt: prompt,
@@ -164,7 +182,8 @@ actor LlamaServer {
                      "[/INST]",
                      "[INST]",
                      "USER:"
-      ]
+      ],
+      xgen: is_xgen
     )
 
     let url = URL(string: "http://127.0.0.1:\(port)/completion")!
@@ -175,6 +194,8 @@ actor LlamaServer {
     request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
     request.setValue("keep-alive", forHTTPHeaderField: "Connection")
     request.httpBody = params.toJSON().data(using: .utf8)
+      
+      print(params)
 
     // Use EventSource to receive server sent events
     eventSource = EventSource(request: request)
@@ -326,6 +347,7 @@ actor LlamaServer {
     var mirostat = 0 // 0/1/2
     var mirostat_tau = 5 // target entropy
     var mirostat_eta = 0.1 // learning rate
+      var xgen = false; // salesforce
 
     func toJSON() -> String {
       let encoder = JSONEncoder()

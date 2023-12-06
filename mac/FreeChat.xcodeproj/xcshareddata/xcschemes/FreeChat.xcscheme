@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "A1F617212A782AA100F2048C"
-               BuildableName = "FreeChat.app"
-               BlueprintName = "FreeChat"
+               BuildableName = "MyFreeChat.app"
+               BlueprintName = "MyFreeChat"
                ReferencedContainer = "container:FreeChat.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -68,8 +68,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "A1F617212A782AA100F2048C"
-            BuildableName = "FreeChat.app"
-            BlueprintName = "FreeChat"
+            BuildableName = "MyFreeChat.app"
+            BlueprintName = "MyFreeChat"
             ReferencedContainer = "container:FreeChat.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -85,8 +85,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "A1F617212A782AA100F2048C"
-            BuildableName = "FreeChat.app"
-            BlueprintName = "FreeChat"
+            BuildableName = "MyFreeChat.app"
+            BlueprintName = "MyFreeChat"
             ReferencedContainer = "container:FreeChat.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
