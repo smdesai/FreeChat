@@ -12,6 +12,8 @@ enum TemplateFormat: String, CaseIterable {
   case chatML
   case alpaca
   case vicuna
+  case xgen
+  case zephyr
 }
 
 protocol Template {
@@ -20,6 +22,7 @@ protocol Template {
   func run(systemPrompt: String, messages: [String]) -> String
 }
 
+// Mistral, Llama2Chat
 struct Llama2Template: Template {
   var format = TemplateFormat.llama2
   var stopWords: [String] = ["</s>"]
@@ -60,6 +63,7 @@ struct Llama2Template: Template {
   }
 }
 
+// Capybara7B, Synthia
 struct VicunaTemplate: Template {
   var format = TemplateFormat.vicuna
   var stopWords: [String] = ["USER", "User:", "user:", "<|im_end|>", "</s>"]
@@ -85,6 +89,7 @@ struct VicunaTemplate: Template {
   }
 }
 
+// OpenHermes, NeuralHermes, Capybara3b
 struct ChatMLTemplate: Template {
   var format = TemplateFormat.chatML
   var stopWords: [String] = ["<|im_end|>"]
@@ -135,6 +140,59 @@ struct AlpacaTemplate: Template {
     }
     
     p += "you:\n\nRespond to user's last line with markdown.\n\n### Response:\n"
+    
+    return p
+  }
+}
+
+// Salesforce Xgen
+struct XgenTemplate: Template {
+  var format = TemplateFormat.xgen
+  var stopWords: [String] = ["### Human:", "###"]
+
+  func run(systemPrompt: String, messages: [String]) -> String {
+    var p = """
+    \(systemPrompt)
+    
+    """
+    
+    var userTalking = true
+    for message in messages {
+      let from = userTalking ? "### Human:" : "###"
+      p.append("\(from) \(message)\n")
+      userTalking.toggle()
+    }
+    
+    p += "###"
+    
+    return p
+  }
+}
+
+// Zephyr
+struct ZephyrTemplate: Template {
+  var format = TemplateFormat.zephyr
+  var stopWords: [String] = ["<|im_end|>"]
+  
+  func run(systemPrompt: String, messages: [String]) -> String {
+    var p = """
+  <|system|>
+  \(systemPrompt)</s>
+  
+  """
+    
+    var userTalking = true
+    for message in messages {
+      p.append("""
+        <|user|>\(userTalking ? "user" : "assistant")
+        \(message)
+        <|/s|>
+        
+        """)
+      userTalking.toggle()
+    }
+    
+    p += "<|assistant|>\n"
     
     return p
   }

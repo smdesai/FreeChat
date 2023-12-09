@@ -23,6 +23,10 @@ struct TemplateManager {
         return vicunaTemplate
       case .alpaca:
         return AlpacaTemplate()
+      case .xgen:
+        return XgenTemplate()
+      case .zephyr:
+        return ZephyrTemplate()
     }
   }
 
@@ -55,7 +59,7 @@ struct TemplateManager {
     
     // This is terrible and I would love a better way to do it.
 
-    if name.contains(/(codellama|llama)(2-|-2-)?-?(\d{1,2}B-)?instruct/.ignoresCase()) || name.contains(/Mistral-7B-Instruct/.ignoresCase()) ||
+    if name.contains(/(codellama|llama)(2-|-2-)?-?(\d{1,2}B-)?instruct/.ignoresCase()) || name.contains(/mistral-7B-instruct/.ignoresCase()) ||
         name.contains(/airoboros-m-7b-3/.ignoresCase()) {
       return .llama2
     }
@@ -64,12 +68,21 @@ struct TemplateManager {
         name.contains(/dolphin-2.1-mistral-7B/.ignoresCase()) ||
         name.contains(/samantha-1.2-mistral-7B/.ignoresCase()) ||
         name.contains(/jackalope-7b/.ignoresCase()) ||
+        name.contains(/neuralhermes-2.*-mistral-7b/.ignoresCase()) ||
         name.contains(/openhermes-2.*-mistral-7b/.ignoresCase()) {
       return .chatML
     }
 
     if name.contains(/nous-hermes-llama-?2/.ignoresCase()) {
       return .alpaca
+    }
+      
+    if name.contains(/ggml-xgen/.ignoresCase()) {
+        return .xgen
+    }
+      
+    if name.contains(/zephyr-7b/.ignoresCase()) || name.contains(/stablelm-zephyr/.ignoresCase()) {
+        return .zephyr
     }
     
     return .vicuna
@@ -85,6 +98,10 @@ struct TemplateManager {
         "Llama 2"
       case .vicuna:
         "Vicuna"
+      case .xgen:
+        "Xgen"
+      case .zephyr:
+        "Zephyr"
     }
   }
 }
